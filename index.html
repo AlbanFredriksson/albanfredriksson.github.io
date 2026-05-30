@@ -12,7 +12,8 @@
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { width: 100%; height: 100%; overflow: hidden; }
+    html, body { width: 100%; }
+    body { overflow-x: hidden; }
 
     body {
       font-family: 'Poppins', sans-serif;
@@ -420,8 +421,6 @@
     document.getElementById('splash').addEventListener('animationend', function(e) {
       if (e.animationName === 'splashOut') {
         this.classList.add('hidden');
-        // Also re-enable scroll on body
-        document.body.style.overflow = '';
       }
     });
   </script>
