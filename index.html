@@ -236,22 +236,25 @@
     #projects-grid {
       display: flex;
       width: 100%;
-      /* height: from heading bottom to bottom of section */
-      height: calc(100vh - clamp(100px, 18vh, 165px));
-      gap: 0;
-      padding: 0 clamp(8px, 0.625vw, 9px);
-      padding-bottom: clamp(8px, 0.625vw, 9px);
+      height: 75vh;
+      min-height: 400px;
+      max-height: 800px;
+      gap: 6px;
+      padding: 0 9px 9px;
     }
 
-    /* Each card: default flex = 1 (equal thirds) */
+    /* Each card: width-based transition — flex alone doesn't animate in all browsers */
     .proj-card {
-      flex: 1;
+      /* Default: equal thirds */
+      flex: 1 1 0;
+      min-width: 0;
       position: relative;
       overflow: hidden;
       cursor: pointer;
       border-radius: 8px;
-      margin: 0 clamp(2px, 0.28vw, 4px);
-      transition: flex 0.55s cubic-bezier(0.77, 0, 0.175, 1);
+      transition:
+        flex 0.6s cubic-bezier(0.77, 0, 0.175, 1),
+        min-width 0.6s cubic-bezier(0.77, 0, 0.175, 1);
     }
 
     .proj-card img {
@@ -309,16 +312,17 @@
       letter-spacing: .06em;
     }
 
-    /* ── HOVER STATE ──
-       Active card expands (~84% of width = 1211/1440)
-       Inactive cards shrink to slim slivers (~6.25% = 90/1440)
-    */
-    #projects-grid:has(.proj-card:hover) .proj-card {
-      flex: 0.42; /* slim */
+    /* ── HOVER STATE ── */
+    /* When any card is hovered, shrink non-hovered cards */
+    #projects-grid:has(.proj-card:hover) .proj-card:not(:hover) {
+      flex: 0 0 7%;
+      min-width: 7%;
     }
 
+    /* Expand the hovered card */
     #projects-grid .proj-card:hover {
-      flex: 8.4;  /* expanded */
+      flex: 0 0 82%;
+      min-width: 82%;
     }
 
     /* Active card: sharp, bright */
