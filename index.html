@@ -54,7 +54,7 @@
         transparent 75%
       );
       filter: blur(28px);
-      animation: circlePulse1 6s ease-in-out infinite alternate;
+      animation: circlePulse1 2.5s ease-in-out infinite alternate;
       will-change: transform;
     }
 
@@ -72,7 +72,7 @@
         transparent 75%
       );
       filter: blur(32px);
-      animation: circlePulse2 7s ease-in-out infinite alternate;
+      animation: circlePulse2 3s ease-in-out infinite alternate;
       will-change: transform;
     }
 
@@ -111,8 +111,8 @@
     }
 
     .nav-label {
-      font-family: 'Nevrada', serif;
-      font-size: 24px;
+      font-family: 'Nevrada', serif !important;
+      font-size: 24px !important;
       font-weight: 400;
       color: #343434;
       white-space: nowrap;
@@ -151,7 +151,7 @@
 
     #hero-scroll span {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: clamp(16px, 1.67vw, 24px);
+      
       color: #343434;
       white-space: nowrap;
       letter-spacing: 0.01em;
@@ -173,7 +173,6 @@
     ═══════════════════════════════════════ */
     #projects {
       background: #ffffff;
-      border-bottom: 1px solid #343434;
       width: 100%;
       padding: 72px 0;
       overflow: hidden;
@@ -201,7 +200,7 @@
       max-width: 1044px;
       margin: 0 auto;
       height: 562px;
-      gap: 19px;
+      gap: 8px;
       padding: 0;
     }
 
@@ -332,8 +331,6 @@
     ═══════════════════════════════════════ */
     #about {
       background: #ffffff;
-      border-top: 1px solid #343434;
-      border-bottom: 1px solid #343434;
       width: 100%;
       height: 590px;
       padding: 72px 0;
@@ -442,7 +439,7 @@
 
     .contact-text-label {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 20px;
+      font-size: 16px;
       font-weight: 400;
       color: #ffffff;
       line-height: 1.51;
@@ -451,7 +448,7 @@
 
     .contact-text-value {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 700;
       color: #ffffff;
       line-height: 1.51;
@@ -462,6 +459,35 @@
       #about-inner { flex-direction: column; }
       #about-photo { width: 100%; height: 300px; }
       #contact-items { flex-direction: column; gap: 32px; }
+    }
+
+    /* ═══════════════════════════════════════
+       SCROLL REVEAL ANIMATION
+    ═══════════════════════════════════════ */
+    .reveal {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── HERO TEXT LOAD ANIMATION ── */
+    @keyframes heroFadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    #hero-text {
+      animation: heroFadeUp 0.9s ease forwards;
+      animation-delay: 0.2s;
+      opacity: 0;
+    }
+    nav {
+      animation: heroFadeUp 0.9s ease forwards;
+      animation-delay: 0.05s;
+      opacity: 0;
     }
   </style>
 </head>
@@ -474,30 +500,26 @@
 
     <nav>
       <a href="#projects" class="nav-item">
-        <span class="nav-label">projects</span>
+        <span class="nav-label" style="font-size:24px;font-family:'Nevrada',serif;">projects</span>
       </a>
       <a href="#about" class="nav-item">
-        <span class="nav-label">about</span>
+        <span class="nav-label" style="font-size:24px;font-family:'Nevrada',serif;">about</span>
       </a>
       <a href="#contact" class="nav-item">
-        <span class="nav-label">contact</span>
+        <span class="nav-label" style="font-size:24px;font-family:'Nevrada',serif;">contact</span>
       </a>
     </nav>
 
     <div id="hero-text">
       I'm a ux designer crafting digital experiences that are <span class="hero-accent-red">intuitive</span> and <span class="hero-accent-blue">data-informed</span>.
     </div>
-
-    <div id="hero-scroll">
-      <span>Scroll down</span>
-      <div id="hero-scroll-arrow">↓</div>
-    </div>
+</div>
 
   </section>
 
 
   <!-- ═══ PROJECTS ═══ -->
-  <section id="projects">
+  <section id="projects" class="reveal">
 
     <h2 id="projects-heading">projects</h2>
 
@@ -536,7 +558,7 @@
 
 
   <!-- ═══ ABOUT ═══ -->
-  <section id="about">
+  <section id="about" class="reveal">
     <div id="about-inner">
       <div id="about-left">
         <h2 id="about-heading">about</h2>
@@ -550,7 +572,7 @@
   </section>
 
   <!-- ═══ CONTACT ═══ -->
-  <section id="contact">
+  <section id="contact" class="reveal">
     <div id="contact-inner">
       <h2 id="contact-heading">contact</h2>
       <div id="contact-items">
@@ -579,7 +601,7 @@
             </svg>
           </div>
           <div>
-            <span class="contact-text-label">My linkedin</span>
+            <span class="contact-text-label">Linkedin</span>
             <span class="contact-text-value">Click here</span>
           </div>
         </a>
@@ -588,5 +610,18 @@
     </div>
   </section>
 
+
+  <script>
+    const revealEls = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    revealEls.forEach(el => observer.observe(el));
+  </script>
 </body>
 </html>
