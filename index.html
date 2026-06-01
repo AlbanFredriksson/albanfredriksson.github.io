@@ -120,13 +120,19 @@
     }
 
     /* ── MAIN TEXT ── */
-    #hero-text {
+    #hero-text-wrapper {
       position: absolute;
-      left: 197px;
       top: 50%;
+      left: 0;
+      right: 0;
       transform: translateY(-50%);
-      width: clamp(300px, 51.6vw, 743px);
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 0 197px;
       z-index: 6;
+    }
+    #hero-text {
+      width: clamp(300px, 51.6vw, 743px);
       font-family: 'Nevrada', serif;
       font-size: clamp(32px, 4.44vw, 64px);
       line-height: 1.149;
@@ -510,8 +516,10 @@
       </a>
     </nav>
 
+    <div id="hero-text-wrapper">
     <div id="hero-text">
       I'm a ux designer crafting digital experiences that are <span class="hero-accent-red">intuitive</span> and <span class="hero-accent-blue">data-informed</span>.
+    </div>
     </div>
 </div>
 
