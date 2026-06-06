@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hero → Section Scroll Transition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #ffffff;
+    --fg: #1a1714;
+    --ink: #1a1714;
+    --ink-soft: #3d3830;
+    --muted: #9b9590;
+    --accent: #2563eb;
+    --accent-light: #dbeafe;
+    --card-radius: 16px;
+  }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Host Grotesk', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 2rem 0;
+    transition: background 0.3s, box-shadow 0.3s, padding 0.3s;
+  }
+  nav.scrolled {
+    background: #fff;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.07);
+    padding: 1.1rem 0;
+  }
+  .nav-inner {
+    max-width: 980px; margin: 0 auto;
+    display: flex; justify-content: flex-end; align-items: center;
+    padding: 0 40px;
+  }
+  .nav-links {
+    display: flex; gap: 2.5rem; list-style: none;
+  }
+  .nav-links a {
+    font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink-soft); text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+
+  /* hamburger button (hidden on desktop) */
+  .nav-toggle {
+    display: none;
+    width: 30px; height: 22px;
+    background: none; border: 0; padding: 0;
+    cursor: pointer; position: relative; z-index: 120;
+  }
+  .nav-toggle span {
+    position: absolute; left: 0; right: 0; height: 2px;
+    background: var(--ink); border-radius: 2px;
+    transition: transform .3s ease, opacity .25s ease, top .3s ease;
+  }
+  .nav-toggle span:nth-child(1) { top: 0; }
+  .nav-toggle span:nth-child(2) { top: 10px; }
+  .nav-toggle span:nth-child(3) { top: 20px; }
+  .nav-toggle.open span:nth-child(1) { top: 10px; transform: rotate(45deg); }
+  .nav-toggle.open span:nth-child(2) { opacity: 0; }
+  .nav-toggle.open span:nth-child(3) { top: 10px; transform: rotate(-45deg); }
+
+  @media (max-width: 760px) {
+    .nav-inner { justify-content: space-between; padding: 0 24px; }
+    .nav-toggle { display: block; }
+    .nav-links {
+      position: fixed; inset: 0;
+      flex-direction: column; justify-content: center; align-items: center;
+      gap: 2rem;
+      background: #fff;
+      transform: translateX(100%);
+      transition: transform .35s cubic-bezier(.4,0,.2,1);
+    }
+    .nav-links.open { transform: translateX(0); }
+    .nav-links a { font-size: 1.1rem; }
+  }
+
+  /* HERO ---------------------------------------------------- */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex; align-items: center;
+    overflow: hidden;
+  }
+  /* particle canvas behind hero */
+  .hero-gradient {
+    position: absolute; inset: 0; z-index: 1;
+    background:
+      radial-gradient(ellipse 70% 60% at 75% 50%, rgba(37, 99, 235, 0.07) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 80% at 20% 80%, rgba(219, 234, 254, 0.12) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-copy {
+    position: relative; z-index: 2;
+    max-width: 980px; width: 100%;
+    margin: 0 auto; padding: 0 40px;
+  }
+  .hero-copy h1 {
+    font-family: 'Host Grotesk', sans-serif;
+    font-weight: 300;
+    font-size: 68px;
+    line-height: 1.0; letter-spacing: -0.01em;
+    color: var(--ink); margin-bottom: 0.2em;
+  }
+  .hero-copy h1 em { font-style: italic; color: var(--accent); }
+  .scramble-word { display: inline-block; min-width: 4ch; }
+  .hero-copy p {
+    font-size: 1rem; line-height: 1.7; color: var(--ink-soft);
+    max-width: 420px; margin-top: 1.5rem;
+    opacity: 0; transform: translateY(12px);
+    animation: fadeUp 0.8s 0.9s ease forwards;
+  }
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* "MAKING THINGS" SECTION — where the cards land ---------- */
+  .making {
+    max-width: 980px; margin: 0 auto;
+    padding: 60px 40px 160px;
+  }
+  .making h2 {
+    font-family: 'Host Grotesk', sans-serif;
+    font-size: clamp(2rem, 4vw, 3.4rem);
+    letter-spacing: -0.01em; font-weight: 300;
+    color: var(--ink);
+    max-width: 760px; line-height: 1.05;
+    margin-bottom: 48px;
+    opacity: var(--h2-op, 0);
+    transform: translateY(calc((1 - var(--h2-op, 0)) * 16px));
+  }
+  .making h2 em { font-style: italic; color: var(--ink); }
+  /* The grid is a real layout slot; it reserves the space where
+     the cards will sit once they finish travelling down. */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  @media (max-width:760px){
+    .card-grid{ grid-template-columns: 1fr; gap: 40px; max-width: 360px; margin: 0 auto; }
+  }
+  .slot { display: block; }
+  .slot-img { aspect-ratio: 3/4; border-radius: var(--card-radius); }
+  .slot-caption {
+    margin-top: 16px;
+    opacity: var(--cap-op, 0);
+    transform: translateY(calc((1 - var(--cap-op, 0)) * 8px));
+    transition: opacity .1s linear;
+  }
+  .slot-caption h3 {
+    font-size: 20px; font-weight: 500; color: var(--ink);
+    letter-spacing: -0.01em; margin-bottom: 4px;
+  }
+  .slot-caption p {
+    font-size: 16px; line-height: 1.5; color: var(--ink-soft);
+  }
+  .view-project {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: 12px;
+    font-size: 14px; font-weight: 500; letter-spacing: 0.02em;
+    color: var(--accent); text-decoration: none;
+    transition: gap .25s ease;
+  }
+  .view-project svg {
+    width: 14px; height: 14px;
+    stroke: currentColor; fill: none; stroke-width: 1.8;
+    transition: transform .25s ease;
+  }
+  .view-project:hover { gap: 12px; }
+  .view-project:hover svg { transform: translateX(3px); }
+  @media (max-width:760px){
+    .slot-img { max-width: 280px; }
+  }
+
+  /* The actual moving cards are fixed-position overlays driven
+     by scroll. They start in the hero (upper right) and travel
+     down to land exactly on the slots above. */
+  .cards { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
+  .card {
+    position: absolute;
+    border-radius: var(--card-radius); overflow: hidden;
+    background: #f0f0f2; box-shadow: 0 16px 40px rgba(0,0,0,.18);
+    width: var(--w); height: var(--h);
+    transform: translate(var(--tx), var(--ty)) rotate(var(--r));
+    will-change: transform, width, height;
+  }
+  .card img { width:100%; height:100%; object-fit:cover; display:block; }
+
+  .after { max-width: 980px; margin: 0 auto; padding: 40px 40px 220px; }
+  .after p { color: var(--muted); max-width: 560px; line-height: 1.6; }
+
+  .hint {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 13px; color: var(--muted); letter-spacing:.04em;
+    animation: bob 1.6s ease-in-out infinite; z-index: 50;
+  }
+  @keyframes bob { 0%,100%{transform:translate(-50%,0)} 50%{transform:translate(-50%,6px)} }
+</style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav>
+    <div class="nav-inner">
+      <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-gradient"></div>
+    <div class="hero-copy">
+      <h1>Designing for<br><em><span class="scramble-word" id="scrambleTarget">humans</span></em></h1>
+      <p>I craft digital experiences grounded in research, empathy, and intentional craft. From discovery to delivery, I turn complexity into clarity.</p>
+    </div>
+  </section>
+
+  <section class="making" id="projects">
+    <h2 id="makingTitle">My <em>projects</em></h2>
+    <div class="card-grid" id="grid">
+      <div class="slot">
+        <div class="slot-img"></div>
+        <div class="slot-caption"><h3>FableVerse</h3><p>GenAI for the animanga-verse</p><a class="view-project" href="#">View project <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>
+      </div>
+      <div class="slot">
+        <div class="slot-img"></div>
+        <div class="slot-caption"><h3>Medal.tv</h3><p>Built for 8 million gamers who clip and share</p><a class="view-project" href="#">View project <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>
+      </div>
+      <div class="slot">
+        <div class="slot-img"></div>
+        <div class="slot-caption"><h3>Kaedim 3D</h3><p>2D concept art into game-ready 3D in minutes</p><a class="view-project" href="#">View project <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="after">
+    <p>Korten har landat i raden ovan, i nivå med rubriken. Allt härunder är vanligt sidflöde.</p>
+  </section>
+
+  <!-- moving overlay cards -->
+  <div class="cards" id="cards">
+    <div class="card"><img alt="" src="https://picsum.photos/id/1062/600/800"></div>
+    <div class="card"><img alt="" src="https://picsum.photos/id/1080/600/800"></div>
+    <div class="card"><img alt="" src="https://picsum.photos/id/1074/600/800"></div>
+  </div>
+
+  <div class="hint">scroll ↓</div>
+
+<script>
+/* ── NAV: scroll state + mobile hamburger ── */
+(function() {
+  const nav = document.querySelector('nav');
+  const toggle = document.getElementById('navToggle');
+  const links = document.getElementById('navLinks');
+
+  addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', scrollY > 40);
+  }, { passive: true });
+
+  function close() {
+    links.classList.remove('open');
+    toggle.classList.remove('open');
+    toggle.setAttribute('aria-expanded', 'false');
+  }
+  toggle.addEventListener('click', () => {
+    const open = links.classList.toggle('open');
+    toggle.classList.toggle('open', open);
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  links.querySelectorAll('a').forEach(a => a.addEventListener('click', close));
+})();
+
+/* ── TEXT SCRAMBLE ── */
+(function() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz#$%&@';
+  const words = ['humans', 'clarity', 'context', 'empathy', 'impact'];
+  let wordIndex = 0;
+  const el = document.getElementById('scrambleTarget');
+  if (!el) return;
+
+  function scrambleTo(target, onDone) {
+    const len = target.length;
+    let frame = 0;
+    const totalFrames = len * 3 + 10;
+    function tick() {
+      let display = '';
+      for (let i = 0; i < len; i++) {
+        display += frame >= i * 3 + 8 ? target[i] : chars[Math.floor(Math.random() * chars.length)];
+      }
+      el.textContent = display;
+      frame++;
+      if (frame < totalFrames) requestAnimationFrame(tick);
+      else { el.textContent = target; if (onDone) setTimeout(onDone, 2200); }
+    }
+    tick();
+  }
+  function cycle() { wordIndex = (wordIndex + 1) % words.length; scrambleTo(words[wordIndex], cycle); }
+  setTimeout(() => scrambleTo(words[0], cycle), 1000);
+})();
+
+/* ── CARD SCROLL TRANSITION ── */
+const cards = [...document.querySelectorAll('.card')];
+const slotImgs = [...document.querySelectorAll('.slot-img')];
+const captions = [...document.querySelectorAll('.slot-caption')];
+const makingTitle = document.getElementById('makingTitle');
+const hero  = document.querySelector('.hero');
+
+const easeInOut = t => t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t+2,2)/2;
+const lerp = (a,b,t) => a + (b-a)*t;
+const clamp = (v,lo,hi) => Math.min(Math.max(v,lo),hi);
+
+// HERO start positions, in viewport coords
+function heroLayout() {
+  const vw = innerWidth, vh = innerHeight;
+
+  // ---- MOBILE: lay the three cards in a row BELOW the hero text ----
+  if (vw <= 760) {
+    const heroCopy = document.querySelector('.hero-copy');
+    const copyRect = heroCopy.getBoundingClientRect();
+    const pad = 24;
+    const gap = 12;
+    const w = (vw - pad*2 - gap*2) / 3;     // three across
+    const h = w * 1.33;
+    const y = Math.min(copyRect.bottom + 32, vh - h - 24); // sit under the text
+    return {
+      w, h,
+      pos: [
+        { x: pad,                 y, r: 0 },
+        { x: pad + w + gap,       y, r: 0 },
+        { x: pad + (w + gap)*2,   y, r: 0 },
+      ]
+    };
+  }
+
+  // ---- DESKTOP: fanned cluster to the right of the hero text ----
+  const w = Math.min(200, vw * 0.2);
+  const h = w * 1.33;
+  const ty = vh * 0.5 - h/2;
+  const colRight = (vw + 980) / 2 - 40;          // right padding edge of column
+  const clusterRight = Math.min(colRight, vw - 24); // don't run off-screen
+  const rx = clusterRight - 70 - w;              // 70 = half cluster spread
+  return {
+    w, h,
+    pos: [
+      { x: rx - 70, y: ty - 24, r: -7 },
+      { x: rx,      y: ty + 14, r:  3 },
+      { x: rx + 70, y: ty - 8,  r:  8 },
+    ]
+  };
+}
+
+function render() {
+  const H = heroLayout();
+
+  // Progress is based on how far we've scrolled through the hero.
+  const heroRect = hero.getBoundingClientRect();
+  const total = heroRect.height;
+  const progress = clamp(-heroRect.top / total, 0, 1);
+
+  // heading fades in as the cards travel down into place
+  makingTitle.style.setProperty('--h2-op', easeInOut(clamp((progress - 0.45) / 0.4, 0, 1)));
+
+  cards.forEach((card, i) => {
+    const a = H.pos[i];
+    const slot = slotImgs[i].getBoundingClientRect();  // land on the image box
+    const b = { x: slot.left, y: slot.top, r: 0 };
+
+    const stagger = i * 0.07;
+    const t = easeInOut(clamp((progress - stagger) / (1 - stagger), 0, 1));
+
+    card.style.setProperty('--w',  lerp(H.w, slot.width,  t) + 'px');
+    card.style.setProperty('--h',  lerp(H.h, slot.height, t) + 'px');
+    card.style.setProperty('--tx', lerp(a.x, b.x, t) + 'px');
+    card.style.setProperty('--ty', lerp(a.y, b.y, t) + 'px');
+    card.style.setProperty('--r',  lerp(a.r, b.r, t) + 'deg');
+
+    // caption below the slot fades in once the card has landed
+    const capOp = clamp((t - 0.92) / 0.08, 0, 1);
+    captions[i].style.setProperty('--cap-op', capOp);
+  });
+}
+
+addEventListener('scroll', render, { passive: true });
+addEventListener('resize', render);
+render();
+</script>
+</body>
+</html>
