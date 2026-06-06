@@ -173,10 +173,16 @@
   }
   .slot { display: flex; flex-direction: column; }
   .slot-img {
+    display: block;
     aspect-ratio: 3/3.2; border-radius: var(--card-radius);
     overflow: hidden;
+    cursor: pointer;
   }
   .slot-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .card img {
+    transition: transform 0.4s ease;
+  }
+  .card.zoom img { transform: scale(1.08); }
   .slot-caption {
     margin-top: 16px;
     flex: 1;                       /* fill remaining slot height */
@@ -464,7 +470,7 @@
     <h2 id="makingTitle">My <em>projects</em></h2>
     <div class="card-grid" id="grid">
       <div class="slot">
-        <div class="slot-img"></div>
+        <a class="slot-img" href="#" aria-label="View project"></a>
         <div class="slot-caption">
           <div class="caption-text">
             <h3>Design system from scratch</h3>
@@ -474,7 +480,7 @@
         </div>
       </div>
       <div class="slot">
-        <div class="slot-img"></div>
+        <a class="slot-img" href="#" aria-label="View project"></a>
         <div class="slot-caption">
           <div class="caption-text">
             <h3>Improving Benify's Onboarding Experience</h3>
@@ -484,7 +490,7 @@
         </div>
       </div>
       <div class="slot">
-        <div class="slot-img"></div>
+        <a class="slot-img" href="#" aria-label="View project"></a>
         <div class="slot-caption">
           <div class="caption-text">
             <h3>In This Dunya</h3>
@@ -579,7 +585,13 @@
   /* smooth scroll */
   document.querySelectorAll('a[href^="#"]').forEach(a => {
     a.addEventListener('click', e => {
-      const target = document.querySelector(a.getAttribute('href'));
+      const href = a.getAttribute('href');
+      if (href === '#') {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      const target = document.querySelector(href);
       if (!target) return;
       e.preventDefault();
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -622,6 +634,11 @@ const captions = [...document.querySelectorAll('.slot-caption')];
 const makingTitle = document.getElementById('makingTitle');
 const projectsEyebrow = document.getElementById('projectsEyebrow');
 const hero  = document.querySelector('.hero');
+
+slotImgs.forEach((slot, i) => {
+  slot.addEventListener('mouseenter', () => cards[i] && cards[i].classList.add('zoom'));
+  slot.addEventListener('mouseleave', () => cards[i] && cards[i].classList.remove('zoom'));
+});
 
 const easeInOut = t => t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t+2,2)/2;
 const lerp = (a,b,t) => a + (b-a)*t;
